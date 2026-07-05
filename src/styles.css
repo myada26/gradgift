@@ -284,3 +284,83 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Scroll progress rail — injected by page-bootstrap.js on the character
+   reveal pages. Stands in for the native scrollbar, which would otherwise
+   float unstyled over the full-bleed fixed scene. Progress comes from the
+   same ScrollTrigger driving the reveal, via --fr-scroll-progress (0–1). */
+html.fr-scroll-rail-active {
+  scrollbar-width: none;
+}
+
+html.fr-scroll-rail-active::-webkit-scrollbar {
+  display: none;
+}
+
+.fr-scroll-rail {
+  --fr-scroll-progress: 0;
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: min(50vh, 360px);
+  z-index: 5;
+  background: #0a0b10;
+  border: 2px solid #e8e8ee;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+  padding: 2px;
+}
+
+.fr-scroll-rail__fill {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  height: calc(var(--fr-scroll-progress) * 100%);
+  background: repeating-linear-gradient(
+    to top,
+    #ff2f8f 0px,
+    #ff2f8f 5px,
+    #ff6fae 5px,
+    #ff6fae 8px
+  );
+}
+
+.fr-scroll-rail__thumb {
+  position: absolute;
+  right: 100%;
+  bottom: calc(var(--fr-scroll-progress) * 100%);
+  transform: translate(-8px, 50%);
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid #e8e8ee;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+}
+
+.fr-scroll-rail__label {
+  position: absolute;
+  right: 100%;
+  bottom: calc(var(--fr-scroll-progress) * 100%);
+  transform: translate(-19px, 50%);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #e8e8ee;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .fr-scroll-rail {
+    right: 8px;
+    height: min(38vh, 260px);
+  }
+  .fr-scroll-rail__label {
+    display: none;
+  }
+}

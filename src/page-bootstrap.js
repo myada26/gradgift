@@ -56,6 +56,41 @@
     return audio;
   }
 
+  // Replaces the native scrollbar with a pixel-styled progress rail, since the
+  // fixed full-bleed scene would otherwise leave the OS scrollbar floating
+  // unstyled over the art. Driven by the same ScrollTrigger as the reveal.
+  function createScrollRail() {
+    document.documentElement.classList.add("fr-scroll-rail-active");
+
+    const rail = document.createElement("div");
+    rail.className = "fr-scroll-rail";
+
+    const fill = document.createElement("div");
+    fill.className = "fr-scroll-rail__fill";
+
+    const thumb = document.createElement("div");
+    thumb.className = "fr-scroll-rail__thumb";
+
+    const label = document.createElement("div");
+    label.className = "fr-scroll-rail__label";
+    label.textContent = "0%";
+
+    rail.append(fill, thumb, label);
+    document.body.appendChild(rail);
+
+    let lastPercent = -1;
+    return {
+      update(progress) {
+        rail.style.setProperty("--fr-scroll-progress", progress);
+        const percent = Math.round(progress * 100);
+        if (percent !== lastPercent) {
+          lastPercent = percent;
+          label.textContent = `${percent}%`;
+        }
+      },
+    };
+  }
+
   function showLoadWarning(characterId, detail) {
     const banner = document.createElement("div");
     banner.textContent =
@@ -110,6 +145,7 @@
     // Single combined timeline (character frame crossfade + reveal text) driven
     // by one ScrollTrigger — both animations progress together, not staged.
     const controller = window.FlowerReveal.createScene(sceneMount, sceneConfig, config, { autoplay: false });
+    const scrollRail = createScrollRail();
 
     ScrollTrigger.create({
       animation: controller.timeline,
@@ -117,6 +153,7 @@
       start: "top top",
       end: "bottom bottom",
       scrub: 0.5,
+      onUpdate: (self) => scrollRail.update(self.progress),
     });
 
     return controller;
