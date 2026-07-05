@@ -1,0 +1,286 @@
+/*
+  Flower Reveal component styles.
+  Reveal stage assumes a shared 9:16 portrait aspect ratio across a character's
+  background/frame art (matches the placeholder assets under /assets). Layered
+  scenes (Phase 8) are full-bleed instead and position each layer directly in
+  viewport units — see the "Scene compositing" block below.
+*/
+
+@font-face {
+  font-family: "Pirkkala";
+  src: url("../assets/pirkkala.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.fr-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #10131a;
+  isolation: isolate;
+}
+
+.fr-bg,
+.fr-frame,
+.fr-closeup-image,
+.fr-bg-layer,
+.fr-char-frame {
+  image-rendering: pixelated;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.fr-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fr-frame-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.fr-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform-origin: 50% 85%;
+}
+
+.fr-title-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8% 6% 0;
+  pointer-events: none;
+}
+
+.fr-title {
+  display: none;
+  margin: 0;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: 600;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+  max-width: 32ch;
+}
+
+.fr-word {
+  display: inline-block;
+  will-change: transform, opacity, filter;
+}
+
+.fr-closeup {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: row;
+}
+
+.fr-closeup-gradient {
+  position: relative;
+  flex: 1 1 55%;
+  display: flex;
+  align-items: center;
+  padding: 8%;
+  background: linear-gradient(120deg, var(--fr-accent, #ff6fae) 0%, rgba(0, 0, 0, 0.75) 100%);
+}
+
+.fr-closeup-text {
+  color: #fff;
+  max-width: 42ch;
+  overflow-wrap: break-word;
+}
+
+.fr-final-title {
+  display: none;
+  margin: 0 0 0.6em;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+  line-height: 1.15;
+}
+
+.fr-final-paragraph {
+  display: none;
+  margin: 0;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+  line-height: 1.55;
+  overflow-wrap: break-word;
+  /* long-copy safety net (Phase 6 QA): caps visible height instead of relying on
+     -webkit-line-clamp, which needs display:-webkit-box and would fight the
+     display:block that GSAP toggles inline when revealing this element */
+  max-height: 9.3em;
+  overflow: hidden;
+}
+
+.fr-closeup-image {
+  flex: 1 1 45%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Scene compositing (Phase 8) — layered full-bleed scene:
+   background (static backdrop) < character (pinned bottom) < gradient + text.
+   All three position directly in viewport units, so they scale with the
+   viewport on their own — no canvas letterbox-fitting step needed. */
+
+.fr-scene {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #10131a;
+}
+
+.fr-scene--fullbleed {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  border-radius: 0;
+  z-index: 0;
+}
+
+/* Layer 1 — background: full-bleed static backdrop, no animation, no text tied to it */
+.fr-bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+
+/* Layer 2 — character: pinned to the bottom, ~65%-70% from the left */
+.fr-char-layer {
+  position: absolute;
+  bottom: 0;
+  left: var(--fr-char-left, 67%);
+  transform: translateX(-50%);
+  height: var(--fr-char-height, 78vh);
+  aspect-ratio: var(--fr-char-aspect, 595 / 837);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fr-char-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  opacity: 0;
+}
+
+/* Layer 3 — left gradient overlay + scroll-reveal text, above the character */
+.fr-gradient-layer {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 50vw;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 6vw;
+  background: linear-gradient(to right, var(--gradient-color, #ffffff) 0%, transparent 100%);
+}
+
+.fr-gradient-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  width: 100%;
+}
+
+.fr-header-1 {
+  display: none;
+  margin: 0;
+  color: #1a1a1a;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+.fr-header-2 {
+  display: none;
+  margin: 0;
+  color: #1a1a1a;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 600;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.fr-header-3 {
+  display: none;
+  margin: 0 0 0.4em;
+  color: #1a1a1a;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(1rem, 1.8vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+/* Auto-wraps regardless of length — no max-height, so any single paragraph
+   of copy fits by wrapping wider/taller rather than being clipped. */
+.fr-gradient-panel .fr-gradient-text {
+  color: #1a1a1a;
+  font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+  font-size: clamp(0.95rem, 1.6vw, 1.35rem);
+  line-height: 1.35;
+  max-width: 34ch;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 700px) {
+  .fr-gradient-layer {
+    width: 72vw;
+    padding: 0 5vw;
+  }
+}
+
+/* Mobile: stack the closeup panel instead of side-by-side */
+@media (max-width: 600px) {
+  .fr-closeup {
+    flex-direction: column;
+  }
+  .fr-closeup-gradient,
+  .fr-closeup-image {
+    flex: 1 1 50%;
+  }
+  .fr-final-paragraph {
+    max-height: 7em;
+  }
+}
+
+/* Reduced motion: JS already swaps to plain crossfades; this is a safety net for
+   any incidental CSS transitions (e.g. hover states) elsewhere in a host page. */
+@media (prefers-reduced-motion: reduce) {
+  .fr-stage *,
+  .fr-scene * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

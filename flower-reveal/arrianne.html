@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Flower Reveal — Arrianne</title>
+<link rel="stylesheet" href="src/styles.css" />
+<link rel="stylesheet" href="src/scroll-reveal.css" />
+<style>
+  html, body { margin: 0; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: #05060a;
+    color: #e8e8ee;
+  }
+  .fr-scroll-hint {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-family: "Pirkkala", Georgia, "Times New Roman", serif;
+    font-size: 0.85rem;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    color: #e8e8ee;
+    opacity: 0.75;
+    padding: 8px 18px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+    pointer-events: none;
+    animation: fr-scroll-hint-fade 2.6s ease-in-out infinite;
+  }
+  .fr-scroll-hint::after {
+    content: "↓";
+    font-size: 0.8rem;
+    font-style: normal;
+    animation: fr-scroll-hint-bounce 1.6s ease-in-out infinite;
+  }
+  @keyframes fr-scroll-hint-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+  @keyframes fr-scroll-hint-fade {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 0.9; }
+  }
+  /* pure scroll-length spacer — height controls how much scrolling the reveal takes */
+  .fr-scroll-spacer {
+    height: 300vh;
+    position: relative;
+    z-index: -1;
+  }
+</style>
+</head>
+<body>
+
+  <div class="fr-scroll-hint">scroll slowly</div>
+  <div id="scene-mount" class="fr-scene fr-scene--fullbleed"></div>
+  <div class="fr-scroll-spacer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="dist/basic-guard.js"></script>
+<script src="dist/config.js"></script>
+<script src="dist/scroll-reveal.js"></script>
+<script src="dist/sequence.js"></script>
+<script src="assets/arrianne/content.js"></script>
+<script src="dist/page-bootstrap.js"></script>
+<script>
+  window.FlowerRevealPage.init("arrianne");
+</script>
+</body>
+</html>

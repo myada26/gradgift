@@ -1,0 +1,19 @@
+/*
+  ScrollReveal text animation styles — ported from the React Bits ScrollReveal
+  component (see scroll-reveal.js) for this project's plain HTML/CSS/JS stack.
+*/
+
+.scroll-reveal {
+  margin: 20px 0;
+}
+
+.scroll-reveal-text {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.scroll-reveal-text .word {
+  display: inline-block;
+}

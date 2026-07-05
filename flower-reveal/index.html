@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Flower Reveal — Enter Code</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .portal-card {
+    width: min(90vw, 360px);
+    text-align: center;
+  }
+  .portal-title {
+    margin: 0 0 1.2em;
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+  .portal-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.75em 1em;
+    font-size: 1rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  .portal-input:focus {
+    outline: none;
+    border-color: #1a1a1a;
+  }
+  .portal-submit {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 0.8em;
+    padding: 0.75em 1em;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .portal-submit:hover {
+    opacity: 0.9;
+  }
+  .portal-error {
+    min-height: 1.2em;
+    margin: 0.8em 0 0;
+    font-size: 0.85rem;
+    color: #c0392b;
+  }
+</style>
+</head>
+<body>
+
+  <form class="portal-card" id="portal-form" novalidate>
+    <p class="portal-title">Enter your code</p>
+    <input
+      class="portal-input"
+      id="portal-code"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      placeholder="CODE"
+    />
+    <button class="portal-submit" type="submit">Continue</button>
+    <p class="portal-error" id="portal-error"></p>
+  </form>
+
+<script src="dist/basic-guard.js"></script>
+<script src="dist/codes.js"></script>
+<script>
+  (function () {
+    const form = document.getElementById("portal-form");
+    const input = document.getElementById("portal-code");
+    const error = document.getElementById("portal-error");
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const code = input.value.trim().toUpperCase();
+      const destination = window.FlowerRevealCodes && window.FlowerRevealCodes[code];
+
+      if (destination) {
+        sessionStorage.setItem("frGrantedCharacter", destination.replace(/\.html$/, ""));
+        window.location.href = destination;
+      } else {
+        error.textContent = "That code isn't recognized — double-check and try again.";
+      }
+    });
+  })();
+</script>
+</body>
+</html>
