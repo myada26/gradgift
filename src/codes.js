@@ -17,5 +17,6 @@
     CYRIL258: "cyrill.html",
     ARRIANNE731: "arrianne.html",
     SOPHIA469: "sophia.html",
+    DAWN275: "dawn.html",
   };
 })(window);

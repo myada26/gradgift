@@ -273,6 +273,37 @@
     ],
   };
 
+  const dawn = {
+    id: "dawn",
+    accentColor: "#ff6fae",
+    scenes: [
+      {
+        id: "gate",
+        background: "assets/shared/background-gate.webp",
+        characterFrames: [
+          "assets/dawn/Slice 11.webp",
+          "assets/dawn/Slice 12.webp",
+          "assets/dawn/Slice 13.webp",
+          "assets/dawn/Slice 14.webp",
+          "assets/dawn/Slice 15.webp",
+          "assets/dawn/Slice 16.webp",
+          "assets/dawn/Slice 17.webp",
+          "assets/dawn/Slice 18.webp",
+          "assets/dawn/Slice 19.webp",
+          "assets/dawn/Slice 20.webp",
+        ],
+        // same 345x488 native art aspect as the other characters' slices
+        characterAspect: { width: 595, height: 837 },
+        characterHeight: "78vh",
+        characterLeft: "67%",
+        frameTransition: "cut",
+        gradientColor: "#f4e4c1",
+        // header1/header2/header3/revealText are loaded at runtime from
+        // assets/dawn/content.json (see dawn.html) — not set here.
+      },
+    ],
+  };
+
   /**
    * Fails loud in the console rather than silently rendering a broken sequence,
    * since this config is meant to be edited by whoever onboards the next character.
@@ -345,6 +376,6 @@
     return { errors, warnings };
   }
 
-  global.FlowerRevealCharacters = { nicole, dj, kc, andrea, cyrill, arrianne, sophia };
+  global.FlowerRevealCharacters = { nicole, dj, kc, andrea, cyrill, arrianne, sophia, dawn };
   global.validateCharacterConfig = validateCharacterConfig;
 })(window);

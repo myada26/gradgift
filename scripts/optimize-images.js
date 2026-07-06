@@ -17,7 +17,7 @@ const path = require("path");
 const sharp = require("sharp");
 
 const ASSETS_DIR = path.join(__dirname, "..", "assets");
-const CHARACTERS = ["nicole", "dj", "kc", "andrea", "cyrill", "arrianne", "sophia"];
+const CHARACTERS = ["nicole", "dj", "kc", "andrea", "cyrill", "arrianne", "sophia", "dawn"];
 const FRAME_NUMBERS = Array.from({ length: 10 }, (_, i) => i + 11); // 11..20
 const WEBP_QUALITY = 85;
 
