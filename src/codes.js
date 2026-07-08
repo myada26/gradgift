@@ -18,5 +18,6 @@
     ARRIANNE731: "arrianne.html",
     SOPHIA469: "sophia.html",
     DAWN275: "dawn.html",
+    SAMPLE100: "sample.html",
   };
 })(window);

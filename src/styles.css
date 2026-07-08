@@ -263,21 +263,26 @@
   width: 100%;
   height: 44vh;
   max-height: 60vh;
+  /* Small inline padding so real glyphs sit inside the fully-opaque part of
+     the mask below — the fade band only ever covers the empty gutter, never
+     actual letters (was eating the first/last letter of flush-edge lines). */
+  padding: 0 10px;
+  box-sizing: border-box;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 22%,
-    #000 78%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    #000 22%,
-    #000 78%,
-    transparent 100%
-  );
+  /* Two gradients intersected into one mask so blurred/dimmed lines dissolve
+     at ALL four edges instead of just top/bottom — without this, blur() on
+     inactive lines bleeds past the box and gets hard-clipped left/right
+     where the mask was still fully opaque. The horizontal band is a fixed
+     10px (matching the padding above), not a %, so it stays just wide
+     enough to catch blur bleed without ever reaching into glyph pixels. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%);
+  mask-composite: intersect;
 }
 
 .fr-lyrics-track {

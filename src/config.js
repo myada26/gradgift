@@ -387,6 +387,37 @@
     return { errors, warnings };
   }
 
-  global.FlowerRevealCharacters = { nicole, dj, kc, andrea, cyrill, arrianne, sophia, dawn };
+  const sample = {
+    id: "sample",
+    accentColor: "#ff6fae",
+    scenes: [
+      {
+        id: "gate",
+        background: "assets/shared/background-gate.webp",
+        characterFrames: [
+          "assets/sample/Slice 11.webp",
+          "assets/sample/Slice 12.webp",
+          "assets/sample/Slice 13.webp",
+          "assets/sample/Slice 14.webp",
+          "assets/sample/Slice 15.webp",
+          "assets/sample/Slice 16.webp",
+          "assets/sample/Slice 17.webp",
+          "assets/sample/Slice 18.webp",
+          "assets/sample/Slice 19.webp",
+          "assets/sample/Slice 20.webp",
+        ],
+        // reuses cyrill's art as a portfolio demo — same 345x488 native art aspect
+        characterAspect: { width: 595, height: 837 },
+        characterHeight: "78vh",
+        characterLeft: "67%",
+        frameTransition: "cut",
+        gradientColor: "#f4e4c1",
+        // header1/header2/header3/revealText are loaded at runtime from
+        // assets/sample/content.json (see sample.html) — not set here.
+      },
+    ],
+  };
+
+  global.FlowerRevealCharacters = { nicole, dj, kc, andrea, cyrill, arrianne, sophia, dawn, sample };
   global.validateCharacterConfig = validateCharacterConfig;
 })(window);

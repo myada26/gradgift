@@ -387,10 +387,10 @@
       tl.addLabel("end", 0);
     }
 
-    // Gradient panel + headers come in together at "end" — but the lyric
-    // reveal is held until they've settled (see "textStart" below), so the
-    // headers read first instead of competing with the first line for
-    // attention the instant the panel appears.
+    // Gradient panel slides in at "end"; headers cascade in one at a time
+    // inside it (h1, then h2, then h3) rather than popping together — the
+    // lyric reveal is still held until they've all settled (see "textStart"
+    // below), so the first line doesn't compete with a mid-cascade header.
     if (gradientLayer) {
       if (reduced) {
         tl.fromTo(gradientLayer, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, "end");
@@ -403,14 +403,24 @@
         );
       }
     }
-    if (h1El) animateEntrance(tl, h1El, { position: "end", finalOpacity: 1 });
-    if (h2El) animateEntrance(tl, h2El, { position: "end", finalOpacity: 1 });
-    if (h3El) animateEntrance(tl, h3El, { position: "end", finalOpacity: 0.85 });
 
-    // Headers finish settling ~0.7s (0.9s reduced-safe pad) after "end" — the
-    // lyric reveal only starts once they're fully in, so the first line is
-    // readable on its own instead of arriving mid-header-entrance.
-    const headerSettle = reduced ? 0.4 : 0.9;
+    const headers = [
+      h1El && { el: h1El, finalOpacity: 1 },
+      h2El && { el: h2El, finalOpacity: 1 },
+      h3El && { el: h3El, finalOpacity: 0.85 },
+    ].filter(Boolean);
+    const headerStagger = reduced ? 0.15 : 0.35;
+    headers.forEach((h, i) => {
+      const position = i === 0 ? "end" : `end+=${(headerStagger * i).toFixed(2)}`;
+      animateEntrance(tl, h.el, { position, finalOpacity: h.finalOpacity });
+    });
+
+    // Headers finish settling ~0.7s (0.9s reduced-safe pad) after the LAST
+    // header starts its cascade — the lyric reveal only starts once they're
+    // all fully in, so the first line is readable on its own instead of
+    // arriving mid-header-entrance.
+    const lastHeaderDelay = headers.length ? headerStagger * (headers.length - 1) : 0;
+    const headerSettle = (reduced ? 0.4 : 0.9) + lastHeaderDelay;
     tl.addLabel("textStart", `end+=${headerSettle}`);
 
     if (reveal) {
