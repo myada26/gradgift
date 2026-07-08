@@ -90,15 +90,33 @@
     const input = document.getElementById("portal-code");
     const error = document.getElementById("portal-error");
 
+    // Single redeem path shared by the manual form and the QR/?code= flow, so a
+    // scanned link and a typed code grant access identically (same gate key,
+    // same destination). Returns true when the code resolved and navigation
+    // started, false otherwise.
+    function redeem(rawCode) {
+      const code = (rawCode || "").trim().toUpperCase();
+      const destination = window.FlowerRevealCodes && window.FlowerRevealCodes[code];
+      if (!destination) return false;
+      sessionStorage.setItem("frGrantedCharacter", destination.replace(/\.html$/, ""));
+      window.location.href = destination;
+      return true;
+    }
+
+    // QR entry: a commission's QR encodes index.html?code=DAWN275 — landing here
+    // with a valid ?code= auto-redeems straight through to that person's page,
+    // no typing. An invalid/absent code just falls back to the manual form.
+    const params = new URLSearchParams(window.location.search);
+    const codeFromUrl = params.get("code");
+    if (codeFromUrl) {
+      if (redeem(codeFromUrl)) return;
+      error.textContent = "That code isn't recognized — double-check and try again.";
+      input.value = codeFromUrl.trim().toUpperCase();
+    }
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-      const code = input.value.trim().toUpperCase();
-      const destination = window.FlowerRevealCodes && window.FlowerRevealCodes[code];
-
-      if (destination) {
-        sessionStorage.setItem("frGrantedCharacter", destination.replace(/\.html$/, ""));
-        window.location.href = destination;
-      } else {
+      if (!redeem(input.value)) {
         error.textContent = "That code isn't recognized — double-check and try again.";
       }
     });

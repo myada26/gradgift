@@ -3,9 +3,11 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "qr": "node scripts/generate-qr.js"
   },
   "devDependencies": {
+    "qrcode": "^1.5.4",
     "sharp": "^0.35.3",
     "terser": "^5.31.0"
   }

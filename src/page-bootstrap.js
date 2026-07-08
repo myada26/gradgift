@@ -11,9 +11,16 @@
  * Expects the page to provide:
  *   <div id="scene-mount" class="fr-scene fr-scene--fullbleed"></div>
  *   <div class="fr-scroll-spacer"></div>
- * and to have already loaded gsap, ScrollTrigger, config.js, scroll-reveal.js,
- * sequence.js, and assets/<characterId>/content.js (which sets
- * window.FlowerRevealContent) before this script.
+ * and to have already loaded gsap, ScrollTrigger, codes.js, config.js,
+ * scroll-reveal.js, sequence.js, and assets/<characterId>/content.js (which
+ * sets window.FlowerRevealContent) before this script.
+ *
+ * Entry: each commission's QR points straight at ITS OWN page
+ * (dawn.html?code=DAWN275), not at the portal — scanning it should land the
+ * friend directly in their reveal, not on an "enter your code" screen. init()
+ * redeems that ?code= locally (see tryDirectCodeRedeem) before falling back to
+ * index.html, so a direct scan never touches the portal at all. Manual code
+ * entry still goes through index.html as before.
  *
  * Content used to be fetched from content.json at runtime, but fetch() of a
  * file:// URL is blocked by the browser — opening one of these pages by
@@ -30,16 +37,49 @@
   // a person's URL directly — the destinations are still visible in
   // src/codes.js, so this isn't real access control, just a speed bump.
   const GATE_KEY = "frGrantedCharacter";
+  const DEFAULT_MUSIC = "assets/bg_music.mp3";
 
   /**
-   * Background music, shared across every character page. Plays automatically
-   * on load — no toggle/mute button by design. A user-initiated portal
-   * navigation (form submit) usually satisfies the browser's autoplay gesture
-   * requirement, but if it's still blocked, playback silently starts on the
-   * first interaction (scrolling to reveal counts) instead of showing a control.
+   * Redeems a `?code=` query param directly on this person's own page — the
+   * path a scanned QR takes (dawn.html?code=DAWN275), skipping the portal
+   * entirely. Only grants access when the code actually resolves to THIS
+   * page (codes.js is shared across every person's page, so a code meant for
+   * someone else is rejected here rather than silently granted). Returns true
+   * once the gate is set.
    */
-  function playBackgroundMusic() {
-    const audio = new Audio("assets/bg_music.mp3");
+  function tryDirectCodeRedeem(characterId) {
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (!code) return false;
+
+    const codes = global.FlowerRevealCodes;
+    const destination = codes && codes[code.trim().toUpperCase()];
+    if (destination !== characterId + ".html") return false;
+
+    sessionStorage.setItem(GATE_KEY, characterId);
+    // Scrub the code out of the visible URL now that the gate is set — cosmetic
+    // (see basic-guard.js), but keeps a screenshotted/shared link from
+    // broadcasting the code in plain sight.
+    window.history.replaceState(null, "", window.location.pathname + window.location.hash);
+    return true;
+  }
+
+  /**
+   * Background music. Defaults to the shared assets/bg_music.mp3, but a
+   * commission can override it with its own track via `config.music` — the two
+   * are independent of the background choice. `preload="none"` keeps it lazy:
+   * the audio file isn't fetched until the first play attempt succeeds, so a
+   * standard page never downloads a custom track it doesn't use.
+   *
+   * Plays automatically on load — no toggle/mute button by design. A
+   * user-initiated portal navigation (form submit) usually satisfies the
+   * browser's autoplay gesture requirement, but if it's still blocked, playback
+   * silently starts on the first interaction (scrolling to reveal counts)
+   * instead of showing a control.
+   */
+  function playBackgroundMusic(src) {
+    const audio = new Audio();
+    audio.preload = "none";
+    audio.src = src || DEFAULT_MUSIC;
     audio.loop = true;
     audio.volume = 0.5;
 
@@ -91,6 +131,55 @@
     };
   }
 
+  /**
+   * Optional add-on block rendered after the main reveal, only when a commission
+   * config carries an `addon`. Kept out of the pinned full-bleed scene so it
+   * scrolls in as normal document flow below it. Images are `loading="lazy"` and
+   * `decoding="async"` so a gallery of photos costs nothing until the viewer
+   * scrolls down to it — no impact on the reveal's scroll performance.
+   */
+  function renderAddon(addon, accentColor) {
+    if (!addon || addon.type !== "gallery" || !Array.isArray(addon.photos) || !addon.photos.length) {
+      return;
+    }
+
+    const section = document.createElement("section");
+    section.className = "fr-addon fr-addon--gallery";
+    if (accentColor) section.style.setProperty("--fr-accent", accentColor);
+
+    if (addon.title) {
+      const heading = document.createElement("h2");
+      heading.className = "fr-addon__title";
+      heading.textContent = addon.title;
+      section.appendChild(heading);
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "fr-addon__grid";
+    addon.photos.forEach((photo) => {
+      if (!photo || !photo.src) return;
+      const figure = document.createElement("figure");
+      figure.className = "fr-addon__item";
+      const img = document.createElement("img");
+      img.className = "fr-addon__img";
+      img.src = photo.src;
+      img.alt = photo.caption || "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      figure.appendChild(img);
+      if (photo.caption) {
+        const cap = document.createElement("figcaption");
+        cap.className = "fr-addon__caption";
+        cap.textContent = photo.caption;
+        figure.appendChild(cap);
+      }
+      grid.appendChild(figure);
+    });
+    section.appendChild(grid);
+
+    document.body.appendChild(section);
+  }
+
   function showLoadWarning(characterId, detail) {
     const banner = document.createElement("div");
     banner.textContent =
@@ -113,13 +202,16 @@
   }
 
   async function init(characterId) {
-    if (sessionStorage.getItem(GATE_KEY) !== characterId) {
-      window.location.replace("index.html");
+    if (sessionStorage.getItem(GATE_KEY) !== characterId && !tryDirectCodeRedeem(characterId)) {
+      // No valid gate and no code (or a code for a different page) — hand off
+      // to the portal, forwarding whatever code was present so it can still
+      // resolve (e.g. a mismatched/foreign code) instead of dead-ending here.
+      const code = new URLSearchParams(window.location.search).get("code");
+      window.location.replace(code ? `index.html?code=${encodeURIComponent(code)}` : "index.html");
       return null;
     }
 
     gsap.registerPlugin(ScrollTrigger);
-    playBackgroundMusic();
 
     const sceneMount = document.getElementById("scene-mount");
     const spacer = document.querySelector(".fr-scroll-spacer");
@@ -127,6 +219,9 @@
     if (!config) {
       throw new Error(`[FlowerReveal] no config for character "${characterId}" in window.FlowerRevealCharacters`);
     }
+
+    // Per-commission track when set, shared default otherwise (see config.music).
+    playBackgroundMusic(config.music);
     const sceneConfig = Object.assign({}, config.scenes[0]);
 
     // Per-person content (headers + the one-paragraph scroll-reveal text) lives
@@ -155,6 +250,10 @@
       scrub: 0.5,
       onUpdate: (self) => scrollRail.update(self.progress),
     });
+
+    // Optional extra block (e.g. photo gallery) below the reveal, if this
+    // commission ordered one. Lazy-loaded images — no cost until scrolled to.
+    renderAddon(config.addon, config.accentColor);
 
     return controller;
   }

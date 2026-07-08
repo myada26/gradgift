@@ -315,9 +315,16 @@
         } else {
           const textMount = document.createElement("div");
           panel.appendChild(textMount);
-          reveal = global.ScrollReveal.buildWordElements(textMount, sceneConfig.revealText, {
-            textClassName: "fr-gradient-text",
-          });
+          // Spotify-style synced lyric reveal: the message is split into lines
+          // and only the active one is in focus while scrolling. `revealLines`
+          // (array) lets a commission phrase its own line breaks; otherwise the
+          // paragraph string is auto-split. Fixed scroll-length regardless of
+          // message length (see addLyricsToTimeline).
+          reveal = global.ScrollReveal.buildLyricElements(
+            textMount,
+            sceneConfig.revealLines || sceneConfig.revealText,
+            { lineClassName: "fr-gradient-text" }
+          );
         }
       }
 
@@ -399,12 +406,17 @@
     if (h3El) animateEntrance(tl, h3El, { position: "end", finalOpacity: 0.85 });
 
     if (reveal) {
-      const totalDuration = tl.labels.end || 1;
-      global.ScrollReveal.addToTimeline(
+      // Give the lyric reveal a fixed slice of timeline-seconds after the
+      // character finishes — this stays constant no matter how many lines the
+      // message has, so a long message advances faster rather than lengthening
+      // the scroll. Roughly matches the character phase's duration for pacing.
+      const lyricsSpan = tl.labels.end || 4;
+      global.ScrollReveal.addLyricsToTimeline(
         tl,
         reveal,
-        { duration: totalDuration, enableBlur: !reduced, baseRotation: reduced ? 0 : 5, blurStrength: 10 },
-        "end"
+        { enableBlur: !reduced, blurStrength: reduced ? 0 : 5, dimOpacity: 0.22 },
+        "end",
+        lyricsSpan
       );
     }
 

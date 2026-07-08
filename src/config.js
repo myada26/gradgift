@@ -10,6 +10,17 @@
  * {
  *   id: string,
  *   accentColor: string,               // CSS color, tints gradient/text per character
+ *
+ *   // --- Per-commission overrides (all optional; omit to use the shared default) ---
+ *   music: string,                     // path to this commission's own track; falls back to
+ *                                      //   the shared assets/bg_music.mp3 when omitted. Lazy-loaded
+ *                                      //   (preload="none") so only the page that needs it fetches it.
+ *   addon: {                           // optional extra block rendered BELOW the main reveal,
+ *     type: "gallery",                 //   only for commissions that ordered it. Currently: "gallery".
+ *     title: string,                   //   optional heading above the block
+ *     photos: [ { src: string, caption?: string } ]  // <img loading="lazy"> — fetched on scroll
+ *   },
+ *
  *   reveal: {                          // optional — the standalone flower-reveal stage (Phases 1-6)
  *     background: string,              // path to the flower-reveal stage background
  *     frames: string[10],              // sequential reveal frames, frame1 -> frame10
