@@ -85,10 +85,20 @@
 
     const attempt = () => audio.play();
     attempt().catch(() => {
+      // Broad event set: some in-app browsers (QR-scanner previews, chat-app
+      // webviews) don't fire every gesture type the same way a normal mobile
+      // browser does, so cover click/touchend in addition to the originals.
       const resume = () => {
-        attempt().catch(() => {});
+        attempt().catch((err) => {
+          // Silent by design (no UI) — but log so it's visible via remote
+          // devtools (Safari Web Inspector / chrome://inspect) instead of
+          // being a total black box when a device still can't play audio
+          // even after a real user gesture (e.g. iOS silent-switch, or an
+          // in-app browser that blocks media outright).
+          console.warn("[FlowerReveal] background music blocked even after user gesture:", err && err.name, err && err.message);
+        });
       };
-      ["pointerdown", "keydown", "touchstart", "scroll"].forEach((evt) =>
+      ["pointerdown", "keydown", "touchstart", "touchend", "click", "scroll"].forEach((evt) =>
         document.addEventListener(evt, resume, { once: true, passive: true })
       );
     });

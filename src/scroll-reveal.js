@@ -161,14 +161,18 @@
     if (global.ScrollTrigger && global.ScrollTrigger.addEventListener) {
       global.ScrollTrigger.addEventListener("refresh", invalidate);
     }
+    // Pre-warm the offset cache (layout read only, no paint) once fonts settle,
+    // so the FIRST scroll-triggered render doesn't pay a layout cost mid-scrub.
+    // Deliberately not calling render() here — painting line 0 as "active"
+    // before the scrubbed tween below actually reaches this section would show
+    // the first lyric line already lit the instant the panel fades in,
+    // overlapping the headers instead of waiting its turn.
     if (global.document && global.document.fonts && global.document.fonts.ready) {
-      global.document.fonts.ready.then(() => {
-        invalidate();
-        render(0);
-      });
+      global.document.fonts.ready.then(measure);
+    } else {
+      measure();
     }
 
-    render(0);
     const proxy = { p: 0 };
     tl.to(proxy, { p: 1, duration: span, ease: "none", onUpdate: () => render(proxy.p) }, position);
 

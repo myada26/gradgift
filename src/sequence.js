@@ -387,8 +387,10 @@
       tl.addLabel("end", 0);
     }
 
-    // Gradient panel + headers come in together, all at "end" — same moment the
-    // reveal text below starts, so nothing in the text panel appears early.
+    // Gradient panel + headers come in together at "end" — but the lyric
+    // reveal is held until they've settled (see "textStart" below), so the
+    // headers read first instead of competing with the first line for
+    // attention the instant the panel appears.
     if (gradientLayer) {
       if (reduced) {
         tl.fromTo(gradientLayer, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, "end");
@@ -405,9 +407,15 @@
     if (h2El) animateEntrance(tl, h2El, { position: "end", finalOpacity: 1 });
     if (h3El) animateEntrance(tl, h3El, { position: "end", finalOpacity: 0.85 });
 
+    // Headers finish settling ~0.7s (0.9s reduced-safe pad) after "end" — the
+    // lyric reveal only starts once they're fully in, so the first line is
+    // readable on its own instead of arriving mid-header-entrance.
+    const headerSettle = reduced ? 0.4 : 0.9;
+    tl.addLabel("textStart", `end+=${headerSettle}`);
+
     if (reveal) {
       // Give the lyric reveal a fixed slice of timeline-seconds after the
-      // character finishes — this stays constant no matter how many lines the
+      // headers settle — this stays constant no matter how many lines the
       // message has, so a long message advances faster rather than lengthening
       // the scroll. Roughly matches the character phase's duration for pacing.
       const lyricsSpan = tl.labels.end || 4;
@@ -415,7 +423,7 @@
         tl,
         reveal,
         { enableBlur: !reduced, blurStrength: reduced ? 0 : 5, dimOpacity: 0.22 },
-        "end",
+        "textStart",
         lyricsSpan
       );
     }
